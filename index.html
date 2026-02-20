@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J BG Remover · soft water flow</title>
+  <!-- Font Awesome for icons (profile, download, share, etc) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #b3e5fc 0%, #e0f2fe 40%, #c4e0ff 80%, #a9d6f0 100%);
+      background-size: 300% 300%;
+      animation: waterFlow 12s ease infinite;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* soft water flow animation */
+    @keyframes waterFlow {
+      0% { background-position: 0% 0%; }
+      50% { background-position: 100% 100%; }
+      100% { background-position: 0% 0%; }
+    }
+
+    /* ripples / wave effect overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 30% 40%, rgba(255,255,255,0.35) 0%, transparent 30%),
+                  radial-gradient(circle at 80% 70%, rgba(255,255,250,0.3) 0%, transparent 35%),
+                  repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 8px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* snowfall canvas */
+    #snowCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border-radius: 2.5rem 1rem 2.5rem 1rem;
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 25px 40px -10px rgba(0,40,80,0.25), inset 0 0 0 1px rgba(255,255,255,0.6);
+    }
+
+    .btn-soft {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 40px;
+      padding: 0.9rem 2.2rem;
+      font-weight: 600;
+      color: #02457a;
+      letter-spacing: 0.5px;
+      box-shadow: 0 12px 25px -8px rgba(0,60,100,0.2);
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .btn-soft:hover {
+      background: rgba(255,255,255,0.8);
+      transform: scale(1.02) translateY(-3px);
+      box-shadow: 0 22px 30px -6px #0369a1;
+    }
+
+    .app-screen {
+      display: none;
+    }
+
+    .welcome-screen {
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+      z-index: 5;
+    }
+
+    .welcome-card {
+      max-width: 520px;
+      width: 100%;
+      padding: 2.8rem 2rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(16px);
+      border-radius: 4rem 1.5rem 4rem 1.5rem;
+      border: 2px solid rgba(255,255,255,0.45);
+      box-shadow: 0 40px 50px -15px #015d94;
+    }
+
+    .welcome-card h1 {
+      font-size: 3.2rem;
+      font-weight: 600;
+      background: linear-gradient(120deg, #023e6b, #1e6f9f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1.2rem;
+      text-shadow: 2px 4px 10px rgba(255,255,255,0.6);
+    }
+
+    .welcome-message {
+      background: rgba(255,255,255,0.4);
+      border-radius: 3rem 1rem 3rem 1rem;
+      padding: 1.8rem;
+      margin: 2rem 0;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: #013b5e;
+      border: 1px solid white;
+    }
+
+    /* main app */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2rem 0.5rem 2rem;
+      position: relative;
+      z-index: 20;
+    }
+
+    .app-header h2 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      background: linear-gradient(130deg, #023e6b, #1e6f9f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 8px white;
+      letter-spacing: -0.5px;
+    }
+
+    .profile-icon {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(4px);
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #015c9b;
+      border: 2px solid white;
+      box-shadow: 0 6px 18px rgba(2,70,120,0.3);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .profile-icon:hover {
+      background: white;
+      transform: scale(1.07);
+    }
+
+    .main-panel {
+      max-width: 800px;
+      margin: 2rem auto 1.5rem auto;
+      padding: 2rem 2rem 2.5rem 2rem;
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(14px);
+      border-radius: 4rem 2rem 4rem 2rem;
+      border: 2px solid rgba(255,255,255,0.5);
+      box-shadow: 0 25px 35px -10px #0369a180;
+      position: relative;
+      z-index: 15;
+    }
+
+    .upload-area {
+      border: 2.5px dashed rgba(255,255,255,0.9);
+      border-radius: 3.5rem 1rem 3.5rem 1rem;
+      padding: 3rem 1rem;
+      text-align: center;
+      background: rgba(255,255,255,0.15);
+      margin-bottom: 2.5rem;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .upload-area:hover {
+      background: rgba(255,255,255,0.35);
+      border-color: white;
+    }
+    .upload-area i {
+      font-size: 3.5rem;
+      color: #023e6b;
+      filter: drop-shadow(2px 6px 10px white);
+    }
+    .upload-area p {
+      font-size: 1.3rem;
+      color: #02457a;
+      font-weight: 500;
+    }
+    #imageUpload {
+      display: none;
+    }
+
+    .result-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .result-image {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 2rem 1rem 2rem 1rem;
+      border: 4px solid white;
+      box-shadow: 0 15px 25px -5px #01497c;
+      background: rgba(255,255,255,0.2);
+      padding: 0.5rem;
+      display: none; /* shown when image ready */
+    }
+    .result-image img {
+      width: 100%;
+      height: auto;
+      border-radius: 1.5rem 0.5rem 1.5rem 0.5rem;
+      display: block;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .action-btn {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(5px);
+      border: 1.5px solid white;
+      border-radius: 40px;
+      padding: 0.9rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #023b66;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .action-btn:disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .action-btn:hover {
+      background: white;
+      transform: translateY(-3px);
+    }
+
+    /* modal (history & dev popup) general */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(30px);
+      border-radius: 3rem 1rem 3rem 1rem;
+      padding: 2rem 1.8rem;
+      border: 2px solid rgba(255,255,255,0.8);
+      box-shadow: 0 30px 50px #01539360;
+      z-index: 100;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .modal.active {
+      display: block;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      color: #023159;
+    }
+    .close-modal {
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .history-thumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      max-height: 250px;
+      overflow-y: auto;
+      padding: 0.3rem;
+    }
+    .history-item {
+      width: 80px;
+      height: 80px;
+      border-radius: 1.2rem 0.3rem 1.2rem 0.3rem;
+      border: 2px solid white;
+      overflow: hidden;
+      background: #c3e2fc;
+    }
+    .history-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .dev-buttons {
+      display: flex;
+      gap: 1.8rem;
+      justify-content: center;
+      margin: 1.5rem 0 0.5rem;
+    }
+    .social-link {
+      background: white;
+      border-radius: 60px;
+      padding: 0.8rem 2rem;
+      text-decoration: none;
+      font-weight: 600;
+      color: #023b66;
+      border: 1px solid #a0cfee;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .dev-footer {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      text-align: center;
+    }
+    .dev-btn {
+      background: rgba(255,255,255,0.4);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid white;
+      border-radius: 60px;
+      padding: 0.8rem 2rem;
+      font-weight: 600;
+      color: #02315e;
+      box-shadow: 0 8px 18px #0260a050;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 1.1rem;
+    }
+
+    .dev-popup {
+      display: none;
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(25px);
+      border-radius: 2.5rem 0.8rem 2.5rem 0.8rem;
+      padding: 1.5rem 2rem;
+      border: 2px solid white;
+      width: 260px;
+    }
+    .dev-popup.show {
+      display: block;
+    }
+
+    .follow-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(30px);
+      border-radius: 3rem 1rem 3rem 1rem;
+      padding: 2rem;
+      border: 3px solid white;
+      z-index: 200;
+      width: 300px;
+      text-align: center;
+    }
+    .follow-popup.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.5);
+      border-top: 4px solid #0269b0;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 1rem auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .text-small { font-size: 0.9rem; color: #01365a; }
+  </style>
+</head>
+<body>
+
+  <!-- snowfall canvas -->
+  <canvas id="snowCanvas"></canvas>
+
+  <!-- WELCOME SCREEN (page 1) -->
+  <div class="welcome-screen" id="welcomeScreen">
+    <div class="welcome-card glass-panel">
+      <h1>✨ J bg remover</h1>
+      <div class="welcome-message">
+        <i class="fas fa-water" style="font-size: 2.5rem; opacity: 0.8; margin-bottom: 0.5rem; display: block;"></i>
+        <p style="font-size: 2rem; line-height: 1.4;">welcome to <br> soft water flow</p>
+        <p style="margin-top: 1rem;">remove background · smooth like water</p>
+      </div>
+      <button class="btn-soft" id="getStartedBtn"><i class="fas fa-droplet"></i> get started  <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- MAIN APP SCREEN (page 2) -->
+  <div class="app-screen" id="appScreen">
+    <div class="app-header">
+      <h2><i class="fas fa-droplet" style="color: #0284c7;"></i> Jbg remover</h2>
+      <div class="profile-icon" id="profileIcon"><i class="fas fa-user-astronaut"></i></div>
+    </div>
+
+    <!-- main card -->
+    <div class="main-panel">
+      <div class="upload-area" id="uploadArea">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>tap to upload photo</p>
+        <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/jpg">
+      </div>
+
+      <!-- result & action row -->
+      <div class="result-section">
+        <div class="result-image" id="resultImageContainer">
+          <img id="resultImg" src="" alt="removed bg">
+        </div>
+        <div class="action-buttons">
+          <button class="action-btn" id="downloadBtn" disabled><i class="fas fa-download"></i> download</button>
+          <button class="action-btn" id="shareBtn" disabled><i class="fas fa-share-alt"></i> share</button>
+        </div>
+        <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+      </div>
+    </div>
+
+    <!-- developer bottom button -->
+    <div class="dev-footer">
+      <div class="dev-btn" id="developerBtn"><i class="fas fa-code"></i> developer</div>
+      <div class="dev-popup" id="devPopup">
+        <div style="text-align: center; margin-bottom: 0.5rem; color: #02315e;"><i class="fas fa-bolt"></i> follow me</div>
+        <div class="dev-buttons">
+          <a href="https://www.instagram.com/real_junaid_x?igsh=aWFoeXJ4Z3EwbGp0" target="_blank" class="social-link"><i class="fab fa-instagram"></i> Instagram</a>
+          <a href="https://youtube.com/@important1117?si=Qzr20lxuer_ExrCk" target="_blank" class="social-link"><i class="fab fa-youtube"></i> YouTube</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY MODAL (profile) -->
+  <div class="modal" id="historyModal">
+    <div class="modal-header">
+      <h3><i class="fas fa-history"></i> your history</h3>
+      <span class="close-modal" id="closeHistory">&times;</span>
+    </div>
+    <div class="history-thumbs" id="historyContainer">
+      <!-- dynamic history -->
+    </div>
+    <p class="text-small" style="margin-top: 0.8rem;">✨ last 5 images stored locally</p>
+  </div>
+
+  <!-- FOLLOW MODAL (download restriction) -->
+  <div class="follow-popup" id="followModal">
+    <i class="fab fa-instagram" style="font-size: 3rem; color: #c42d8f; margin-bottom: 0.5rem;"></i>
+    <h3 style="color: #02315e;">Follow to download</h3>
+    <p style="margin: 1rem 0;">follow Instagram account then click verify</p>
+    <a href="https://www.instagram.com/real_junaid_x?igsh=aWFoeXJ4Z3EwbGp0" target="_blank" class="action-btn" style="margin: 0.5rem auto; display: inline-block;">open Instagram</a>
+    <br>
+    <button class="action-btn" id="verifyFollowBtn" style="margin-top: 1rem;">✓ I have followed</button>
+    <button class="action-btn" id="cancelFollowBtn" style="background: transparent;">cancel</button>
+  </div>
+
+  <script>
+    (function() {
+      // ------ SNOWFALL (canvas) ------
+      const canvas = document.getElementById('snowCanvas');
+      const ctx = canvas.getContext('2d');
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      let snowflakes = [];
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      const SNOW_COUNT = 70;
+      for (let i = 0; i < SNOW_COUNT; i++) {
+        snowflakes.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 3 + 1.5,
+          speed: Math.random() * 0.8 + 0.3,
+          sway: Math.random() * 1.5,
+        });
+      }
+
+      function drawSnow() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.beginPath();
+        for (let flake of snowflakes) {
+          ctx.moveTo(flake.x, flake.y);
+          ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+        }
+        ctx.fill();
+        updateSnow();
+      }
+
+      function updateSnow() {
+        for (let flake of snowflakes) {
+          flake.y += flake.speed;
+          flake.x += Math.sin(flake.y * 0.02) * 0.2; // gentle sway
+          if (flake.y > height) {
+            flake.y = -10;
+            flake.x = Math.random() * width;
+          }
+          if (flake.x > width + 5) flake.x = -5;
+          if (flake.x < -5) flake.x = width + 5;
+        }
+      }
+
+      function animateSnow() {
+        drawSnow();
+        requestAnimationFrame(animateSnow);
+      }
+      animateSnow();
+
+      // ------ UI switches ------
+      const welcomeScreen = document.getElementById('welcomeScreen');
+      const appScreen = document.getElementById('appScreen');
+      const getStarted = document.getElementById('getStartedBtn');
+      getStarted.addEventListener('click', () => {
+        welcomeScreen.style.display = 'none';
+        appScreen.style.display = 'block';
+      });
+
+      // ------ API details ------
+      const API_URL = 'https://cors-anywhere.herokuapp.com/https://api.remove.bg/v1.0/removebg'; // proxy for CORS
+      const API_KEY = '9K5nnPBTnK9LBrMhkhCoazzY';
+
+      // ------ DOM elements ------
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('imageUpload');
+      const resultContainer = document.getElementById('resultImageContainer');
+      const resultImg = document.getElementById('resultImg');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const shareBtn = document.getElementById('shareBtn');
+      const spinner = document.getElementById('loadingSpinner');
+      const profileIcon = document.getElementById('profileIcon');
+      const historyModal = document.getElementById('historyModal');
+      const closeHistory = document.getElementById('closeHistory');
+      const historyContainer = document.getElementById('historyContainer');
+      const developerBtn = document.getElementById('developerBtn');
+      const devPopup = document.getElementById('devPopup');
+      const followModal = document.getElementById('followModal');
+      const verifyFollow = document.getElementById('verifyFollowBtn');
+      const cancelFollow = document.getElementById('cancelFollowBtn');
+
+      // state
+      let currentResultBlob = null; // store result blob for download
+      let currentResultDataURL = '';
+      let followVerified = false;    // session flag (you can change, for demo we use session)
+
+      // history array (max 5)
+      let imageHistory = JSON.parse(localStorage.getItem('jbg_history')) || [];
+
+      // ------ functions ------
+      function updateHistoryDisplay() {
+        historyContainer.innerHTML = '';
+        if (imageHistory.length === 0) {
+          historyContainer.innerHTML = '<p style="color:#02315e;">no images yet</p>';
+          return;
+        }
+        // show last 5 (latest first)
+        imageHistory.slice().reverse().forEach(dataURL => {
+          const div = document.createElement('div');
+          div.className = 'history-item';
+          const img = document.createElement('img');
+          img.src = dataURL;
+          div.appendChild(img);
+          historyContainer.appendChild(div);
+        });
+      }
+
+      function addToHistory(dataURL) {
+        imageHistory.push(dataURL);
+        if (imageHistory.length > 5) imageHistory.shift();
+        localStorage.setItem('jbg_history', JSON.stringify(imageHistory));
+        updateHistoryDisplay();
+      }
+
+      // upload & call API
+      uploadArea.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // disable buttons, show spinner
+        resultContainer.style.display = 'none';
+        spinner.style.display = 'block';
+        downloadBtn.disabled = true;
+        shareBtn.disabled = true;
+        currentResultBlob = null;
+
+        const formData = new FormData();
+        formData.append('image_file', file);
+        formData.append('size', 'auto');
+
+        try {
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+              'X-Api-Key': API_KEY,
+            },
+            body: formData
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API error: ${response.status} ${errorText}`);
+          }
+
+          const blob = await response.blob();
+          // convert to data URL for display & history
+          const reader = new FileReader();
+          reader.onloadend = function() {
+            const dataURL = reader.result;
+            resultImg.src = dataURL;
+            resultContainer.style.display = 'block';
+            spinner.style.display = 'none';
+            currentResultBlob = blob;
+            currentResultDataURL = dataURL;
+            downloadBtn.disabled = false;   // but will trigger follow popup
+            shareBtn.disabled = false;
+
+            // save to history
+            addToHistory(dataURL);
+          };
+          reader.readAsDataURL(blob);
+
+        } catch (err) {
+          spinner.style.display = 'none';
+          alert('Background removal failed. Note: CORS proxy may need activation. Please visit "https://cors-anywhere.herokuapp.com/" and request temporary access, then retry. \n\nError: ' + err.message);
+          console.error(err);
+        }
+      });
+
+      // download with follow check
+      downloadBtn.addEventListener('click', () => {
+        if (!currentResultBlob) return;
+        if (!followVerified) {
+          // show follow modal
+          followModal.classList.add('show');
+        } else {
+          triggerDownload();
+        }
+      });
+
+      function triggerDownload() {
+        const url = URL.createObjectURL(currentResultBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `jbg_removed_${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      verifyFollow.addEventListener('click', () => {
+        followVerified = true;
+        followModal.classList.remove('show');
+        triggerDownload();
+      });
+
+      cancelFollow.addEventListener('click', () => {
+        followModal.classList.remove('show');
+      });
+
+      // share (simple web share if supported)
+      shareBtn.addEventListener('click', () => {
+        if (!currentResultBlob) return;
+        if (navigator.share) {
+          const file = new File([currentResultBlob], 'jbg-removed.png', { type: 'image/png' });
+          navigator.share({
+            title: 'J BG Remover',
+            text: 'Look at this background-free image!',
+            files: [file]
+          }).catch(() => {});
+        } else {
+          alert('Share not supported, you can download and share manually.');
+        }
+      });
+
+      // profile icon -> show history modal
+      profileIcon.addEventListener('click', () => {
+        updateHistoryDisplay();
+        historyModal.classList.add('active');
+      });
+      closeHistory.addEventListener('click', () => historyModal.classList.remove('active'));
+      window.addEventListener('click', (e) => {
+        if (e.target === historyModal) historyModal.classList.remove('active');
+        if (e.target === followModal) followModal.classList.remove('show');
+      });
+
+      // developer button toggle popup
+      developerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        devPopup.classList.toggle('show');
+      });
+      document.addEventListener('click', (e) => {
+        if (!devPopup.contains(e.target) && !developerBtn.contains(e.target)) {
+          devPopup.classList.remove('show');
+        }
+      });
+
+      // close dev popup if click outside (already)
+      // also init history display
+      updateHistoryDisplay();
+
+      // extra: prefill demo notice for CORS
+      console.log('Note: CORS proxy used. If API fails, enable cors-anywhere demo access.');
+    })();
+  </script>
+
+  <!-- ensure result container hidden initially -->
+  <style>
+    #resultImageContainer { display: none; }
+    .result-image img { width: 100%; }
+    #loadingSpinner { margin: 0 auto; }
+  </style>
+</body>
+</html>
