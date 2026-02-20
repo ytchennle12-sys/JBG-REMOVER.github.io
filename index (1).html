@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J bg remover · soft water</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #a0d0ff 0%, #c8e7ff 40%, #e0f0ff 80%);
+            background-size: 400% 400%;
+            animation: waterFlow 12s ease infinite;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 🌊 water flow animation */
+        @keyframes waterFlow {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        /* ❄️ snowfall */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.5em;
+            user-select: none;
+            pointer-events: none;
+            z-index: 9999;
+            animation: fall linear infinite;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+
+        /* glassmorphism boxes */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 40, 80, 0.2), inset 0 0 30px rgba(255,255,255,0.6);
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 25px 50px rgba(0, 60, 100, 0.3), inset 0 0 40px white;
+        }
+
+        /* welcome screen */
+        .welcome-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(6px);
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .welcome-box {
+            max-width: 500px;
+            width: 80%;
+            text-align: center;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .welcome-box h1 {
+            font-size: 2.8rem;
+            font-weight: 400;
+            color: #02457a;
+            text-shadow: 2px 2px 10px rgba(255,255,255,0.8);
+            margin-bottom: 1rem;
+        }
+
+        .welcome-box p {
+            font-size: 1.4rem;
+            color: #013a63;
+            background: rgba(255,255,255,0.3);
+            border-radius: 60px;
+            padding: 0.8rem 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn {
+            background: rgba(255,255,255,0.5);
+            border: 2px solid white;
+            color: #02457a;
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 0.8rem 2.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0,30,60,0.2);
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: white;
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px #012a4a50;
+        }
+
+        /* main app (hidden initially) */
+        .app-container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(12px);
+            border-radius: 60px;
+            padding: 0.8rem 2rem;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+
+        .app-header h2 {
+            font-size: 2.4rem;
+            font-weight: 300;
+            color: #013a63;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 5px white;
+        }
+
+        .profile-icon {
+            font-size: 2.4rem;
+            color: #02457a;
+            cursor: pointer;
+            transition: 0.2s;
+            filter: drop-shadow(0 4px 6px white);
+        }
+        .profile-icon:hover {
+            transform: scale(1.15);
+            color: #012a4a;
+        }
+
+        /* upload area */
+        .upload-area {
+            border: 3px dashed rgba(255,255,255,0.8);
+            border-radius: 60px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .upload-area:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: white;
+        }
+        .upload-area i {
+            font-size: 5rem;
+            color: white;
+            text-shadow: 0 5px 10px #013a63;
+        }
+        .upload-area p {
+            font-size: 1.8rem;
+            color: #013a63;
+            font-weight: 400;
+        }
+
+        /* result area */
+        .result-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 2rem;
+        }
+        .result-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(1, 30, 60, 0.3);
+            border: 4px solid white;
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .action-btn {
+            background: rgba(255,255,255,0.35);
+            backdrop-filter: blur(12px);
+            border: 2px solid white;
+            border-radius: 50px;
+            padding: 0.8rem 2rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #013a63;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px #001d3d30;
+        }
+        .action-btn i {
+            font-size: 1.5rem;
+        }
+        .action-btn:hover {
+            background: white;
+            transform: translateY(-3px);
+        }
+
+        /* developer bottom button */
+        .dev-footer {
+            margin-top: 4rem;
+            text-align: center;
+        }
+        .dev-btn {
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.6);
+            color: #013a63;
+            font-size: 1.2rem;
+            padding: 0.5rem 2rem;
+            border-radius: 40px;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .dev-btn:hover {
+            background: rgba(255,255,255,0.4);
+            border-color: white;
+        }
+
+        /* modals (history & dev) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,20,40,0.2);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: rgba(255,255,255,0.3);
+            backdrop-filter: blur(20px);
+            border-radius: 50px;
+            border: 3px solid rgba(255,255,255,0.7);
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 60px #001d3d40;
+        }
+        .modal-content h3 {
+            font-size: 2rem;
+            color: #012a4a;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+        .history-item {
+            background: rgba(255,255,255,0.4);
+            border-radius: 20px;
+            padding: 0.5rem;
+            text-align: center;
+            border: 2px solid white;
+        }
+        .history-item img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+        .dev-icons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .dev-icons a {
+            background: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #013a63;
+            border: 3px solid #a2d2ff;
+            transition: 0.2s;
+        }
+        .dev-icons a:hover {
+            transform: scale(1.15);
+            background: #a2d2ff;
+            color: white;
+        }
+        .close-modal {
+            margin-top: 1.5rem;
+            text-align: right;
+        }
+        .close-btn {
+            background: rgba(255,255,255,0.5);
+            border: none;
+            font-size: 1.2rem;
+            padding: 0.5rem 1.8rem;
+            border-radius: 40px;
+            border: 2px solid white;
+            cursor: pointer;
+        }
+
+        /* loading spinner */
+        .spinner {
+            border: 6px solid rgba(255,255,255,0.3);
+            border-top: 6px solid #02457a;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <!-- ❄️ Snowflakes (generated by JS) -->
+    <div id="snow-container"></div>
+
+    <!-- 🌊 WELCOME SCREEN (first page) -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="glass-card welcome-box">
+            <h1>✨ J bg remover</h1>
+            <p>💧 soft as water • pure magic</p>
+            <button class="btn" id="getStartedBtn"><i class="fa-regular fa-hand-pointer"></i> get started</button>
+        </div>
+    </div>
+
+    <!-- 🌊 MAIN APP (second page) -->
+    <div class="app-container" id="appContainer">
+        <div class="app-header glass-card" style="padding: 0.8rem 2rem;">
+            <h2>Jbg remover</h2>
+            <div class="profile-icon" id="profileIcon"><i class="fa-regular fa-circle-user"></i></div>
+        </div>
+
+        <!-- upload area -->
+        <div class="upload-area" id="uploadArea">
+            <i class="fa-regular fa-images"></i>
+            <p>tap to upload photo</p>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+
+        <!-- result area (hidden initially) -->
+        <div class="result-area hidden" id="resultArea">
+            <img class="result-image" id="resultImg" src="" alt="removed background">
+            <div class="action-buttons">
+                <button class="action-btn" id="downloadBtn"><i class="fa-regular fa-circle-down"></i> download</button>
+                <button class="action-btn" id="shareBtn"><i class="fa-regular fa-share-from-square"></i> share</button>
+            </div>
+        </div>
+
+        <!-- loading indicator -->
+        <div id="loadingSpinner" class="spinner hidden"></div>
+
+        <!-- developer bottom button -->
+        <div class="dev-footer">
+            <button class="dev-btn" id="devBtn"><i class="fa-regular fa-code"></i> developer</button>
+        </div>
+    </div>
+
+    <!-- 📜 HISTORY MODAL (profile) -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content">
+            <h3><i class="fa-regular fa-clock"></i> image history</h3>
+            <div class="history-grid" id="historyGrid">
+                <!-- filled by js -->
+            </div>
+            <div class="close-modal">
+                <button class="close-btn" id="closeHistoryBtn">close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 👨‍💻 DEVELOPER MODAL -->
+    <div class="modal" id="devModal">
+        <div class="modal-content">
+            <h3><i class="fa-regular fa-heart"></i> developer</h3>
+            <div class="dev-icons">
+                <a href="https://www.instagram.com/real_junaid_x?igsh=aWFoeXJ4Z3EwbGp0" target="_blank" id="instaDev"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://youtube.com/@important1117?si=Qzr20lxuer_ExrCk" target="_blank" id="youtubeDev"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+            <div class="close-modal">
+                <button class="close-btn" id="closeDevBtn">close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ----------------------------------- SNOWFALL -----------------------------------
+            function createSnow() {
+                const container = document.getElementById('snow-container');
+                for (let i = 0; i < 50; i++) {
+                    let snow = document.createElement('div');
+                    snow.classList.add('snowflake');
+                    snow.innerHTML = '❄️';
+                    snow.style.left = Math.random() * 100 + '%';
+                    snow.style.animationDuration = Math.random() * 5 + 5 + 's'; // 5-10s
+                    snow.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                    snow.style.opacity = Math.random() * 0.7 + 0.3;
+                    snow.style.animationDelay = Math.random() * 5 + 's';
+                    container.appendChild(snow);
+                }
+            }
+            createSnow();
+
+            // ----------------------------------- GLOBAL VARS ---------------------------------
+            const API_KEY = '9K5nnPBTnK9LBrMhkhCoazzY';
+            const API_URL = 'https://api.remove.bg/v1.0/removebg';
+
+            // DOM elements
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const appContainer = document.getElementById('appContainer');
+            const getStarted = document.getElementById('getStartedBtn');
+            const profileIcon = document.getElementById('profileIcon');
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const resultArea = document.getElementById('resultArea');
+            const resultImg = document.getElementById('resultImg');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const shareBtn = document.getElementById('shareBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const devBtn = document.getElementById('devBtn');
+            const historyModal = document.getElementById('historyModal');
+            const devModal = document.getElementById('devModal');
+            const historyGrid = document.getElementById('historyGrid');
+            const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+            const closeDevBtn = document.getElementById('closeDevBtn');
+
+            // current result blob for download
+            let currentResultBlob = null;
+            let currentResultUrl = null;
+
+            // ---------- HISTORY (localStorage) ----------
+            let historyImages = []; // array of {id, dataUrl, timestamp}
+
+            function loadHistory() {
+                try {
+                    const stored = localStorage.getItem('jbg_history');
+                    if (stored) historyImages = JSON.parse(stored) || [];
+                } catch (e) { console.warn("history parse error", e); }
+                // limit to last 10
+                if (historyImages.length > 10) historyImages = historyImages.slice(-10);
+            }
+            function saveHistory() {
+                localStorage.setItem('jbg_history', JSON.stringify(historyImages));
+            }
+            function addHistoryItem(dataUrl) {
+                const item = {
+                    id: Date.now() + Math.random().toString(36),
+                    dataUrl: dataUrl,
+                    timestamp: new Date().toLocaleString()
+                };
+                historyImages.push(item);
+                if (historyImages.length > 10) historyImages.shift();
+                saveHistory();
+            }
+
+            // render history modal
+            function renderHistory() {
+                historyGrid.innerHTML = '';
+                if (historyImages.length === 0) {
+                    historyGrid.innerHTML = '<p style="text-align:center;color:#013a63;">✨ no history yet</p>';
+                    return;
+                }
+                // show latest first
+                [...historyImages].reverse().forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.innerHTML = `<img src="${item.dataUrl}" alt="history" loading="lazy"><small>✔️</small>`;
+                    historyGrid.appendChild(div);
+                });
+            }
+
+            // ---------- WELCOME -> MAIN ----------
+            getStarted.addEventListener('click', () => {
+                welcomeScreen.style.display = 'none';
+                appContainer.style.display = 'block';
+            });
+
+            // ---------- UPLOAD ----------
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                processImage(file);
+            });
+
+            async function processImage(file) {
+                // hide previous result, show loading
+                resultArea.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
+
+                const formData = new FormData();
+                formData.append('image_file', file);
+                formData.append('size', 'auto'); // regular size
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'X-Api-Key': API_KEY },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`API error: ${response.status} - ${errorText}`);
+                    }
+
+                    const blob = await response.blob();
+                    // create object url
+                    if (currentResultUrl) URL.revokeObjectURL(currentResultUrl);
+                    currentResultBlob = blob;
+                    currentResultUrl = URL.createObjectURL(blob);
+                    resultImg.src = currentResultUrl;
+                    resultArea.classList.remove('hidden');
+
+                    // convert blob to dataURL for history
+                    const reader = new FileReader();
+                    reader.onloadend = function() {
+                        const dataUrl = reader.result;
+                        addHistoryItem(dataUrl);
+                    };
+                    reader.readAsDataURL(blob);
+
+                } catch (err) {
+                    alert('Background removal failed: ' + err.message);
+                    console.error(err);
+                } finally {
+                    loadingSpinner.classList.add('hidden');
+                }
+            }
+
+            // ---------- DOWNLOAD (with instagram follow simulation) ----------
+            downloadBtn.addEventListener('click', function() {
+                if (!currentResultBlob) {
+                    alert('No image yet. Upload and remove background first.');
+                    return;
+                }
+                // open instagram (follow requirement)
+                window.open('https://www.instagram.com/real_junaid_x?igsh=aWFoeXJ4Z3EwbGp0', '_blank');
+
+                // after a short delay, trigger download (assuming they followed)
+                setTimeout(() => {
+                    const url = URL.createObjectURL(currentResultBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'jbg-removed.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 1500); // 1.5 sec to let instagram open
+            });
+
+            // ---------- SHARE (Web Share if supported) ----------
+            shareBtn.addEventListener('click', async function() {
+                if (!currentResultBlob) {
+                    alert('No image yet.');
+                    return;
+                }
+                if (navigator.share) {
+                    try {
+                        const file = new File([currentResultBlob], 'jbg-removed.png', { type: 'image/png' });
+                        await navigator.share({
+                            title: 'J bg remover',
+                            text: 'Check out this background removal!',
+                            files: [file]
+                        });
+                    } catch (err) {
+                        alert('Share cancelled or failed.');
+                    }
+                } else {
+                    // fallback: copy link
+                    alert('Share not supported natively. You can download and share manually.');
+                }
+            });
+
+            // ---------- PROFILE (history modal) ----------
+            profileIcon.addEventListener('click', () => {
+                renderHistory();
+                historyModal.style.display = 'flex';
+            });
+            closeHistoryBtn.addEventListener('click', () => {
+                historyModal.style.display = 'none';
+            });
+            window.addEventListener('click', (e) => {
+                if (e.target === historyModal) historyModal.style.display = 'none';
+                if (e.target === devModal) devModal.style.display = 'none';
+            });
+
+            // ---------- DEVELOPER MODAL ----------
+            devBtn.addEventListener('click', () => {
+                devModal.style.display = 'flex';
+            });
+            closeDevBtn.addEventListener('click', () => {
+                devModal.style.display = 'none';
+            });
+
+            // preload history
+            loadHistory();
+
+            // ---------- drag & drop (optional) ----------
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = 'rgba(255,255,255,0.4)';
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.background = 'rgba(255,255,255,0.15)';
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = 'rgba(255,255,255,0.15)';
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    processImage(file);
+                } else {
+                    alert('Please drop an image file.');
+                }
+            });
+
+            // clean up object URL on page unload (optional)
+            window.addEventListener('beforeunload', () => {
+                if (currentResultUrl) URL.revokeObjectURL(currentResultUrl);
+            });
+
+            // developer links already in modal (hardcoded href)
+            // but ensure they open properly (they are <a> tags)
+        })();
+    </script>
+    <!-- extra insta link for download button (already used) -->
+    <!-- note: api key is used client-side – for demo only -->
+</body>
+</html>
